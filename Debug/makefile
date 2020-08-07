@@ -29,12 +29,6 @@ RM := rm -rf
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(S_DEPS)),)
--include $(S_DEPS)
-endif
-ifneq ($(strip $(S_UPPER_DEPS)),)
--include $(S_UPPER_DEPS)
-endif
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
 endif
@@ -44,24 +38,24 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-STM32F7_IEPEHighSpeed-master.elf \
+STM32F7_HighSpeed_IEPE.elf \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-STM32F7_IEPEHighSpeed-master.list \
+STM32F7_HighSpeed_IEPE.list \
 
 OBJCOPY_BIN += \
-STM32F7_IEPEHighSpeed-master.bin \
+STM32F7_HighSpeed_IEPE.bin \
 
 
 # All Target
-all: STM32F7_IEPEHighSpeed-master.elf secondary-outputs
+all: STM32F7_HighSpeed_IEPE.elf secondary-outputs
 
 # Tool invocations
-STM32F7_IEPEHighSpeed-master.elf: $(OBJS) $(USER_OBJS) C:\Users\USER\Desktop\Ework\source_code\firmware\STM32F7_IEPEHighSpeed-master\STM32F767ZITX_FLASH.ld
-	arm-none-eabi-gcc -o "STM32F7_IEPEHighSpeed-master.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\USER\Desktop\Ework\source_code\firmware\STM32F7_IEPEHighSpeed-master\STM32F767ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F7_IEPEHighSpeed-master.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32F7_HighSpeed_IEPE.elf: $(OBJS) $(USER_OBJS) E:\Production\STM32F7\Vibration\STM32F7_IEPEHighSpeed\STM32F767ZITX_FLASH.ld
+	arm-none-eabi-gcc -o "STM32F7_HighSpeed_IEPE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"E:\Production\STM32F7\Vibration\STM32F7_IEPEHighSpeed\STM32F767ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F7_HighSpeed_IEPE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,13 +64,13 @@ default.size.stdout: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-STM32F7_IEPEHighSpeed-master.list: $(EXECUTABLES)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32F7_IEPEHighSpeed-master.list"
+STM32F7_HighSpeed_IEPE.list: $(EXECUTABLES)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "STM32F7_HighSpeed_IEPE.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-STM32F7_IEPEHighSpeed-master.bin: $(EXECUTABLES)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32F7_IEPEHighSpeed-master.bin"
+STM32F7_HighSpeed_IEPE.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32F7_HighSpeed_IEPE.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 

@@ -205,7 +205,7 @@ float *xdatatoSend = ADS1256.data_buffer;
 float FFTdata[8192];
 float rawData[4096];
 
-
+float speedans = 0;
 /* USER CODE END 0 */
 
 /**
@@ -809,8 +809,18 @@ void FFT_Thread(void const * argument)
 
 	 				maxValue = maxValue*2 / dataLength;
 
-
-
+	 				testOutput[1] = 0;
+	 				testOutput[2] = 0;
+	 				testOutput[3] = 0;
+	 				testOutput[4] = 0;
+	 				testOutput[5] = 0;
+	 				testOutput[6] = 0;
+	 				testOutput[4090] = 0;
+	 				testOutput[4091] = 0;
+	 				testOutput[4092] = 0;
+	 				testOutput[4093] = 0;
+	 				testOutput[4094] = 0;
+	 				testOutput[4095] = 0;
 	 				/* focus broad band functionality
 	 				for(int i =0; i<14; i++)
 	 				{
@@ -820,6 +830,7 @@ void FFT_Thread(void const * argument)
 
 	 				/*Calculate math function*/
 	 				statistic_value.Statistic_FreqOvall = Calculate_FreqOverAll(testOutput, dataLength);
+
 	 				arm_max_f32(statisticDataSet, dataLength, &statistic_value.Statistic_max, &maxtestIndex);
 	 				arm_min_f32(statisticDataSet, dataLength, &statistic_value.Statistic_min, &mintestIndex);
 	 				arm_var_f32(statisticDataSet, dataLength, &statistic_value.Statistic_var);

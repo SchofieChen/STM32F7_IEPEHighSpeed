@@ -1,7 +1,8 @@
 #include "Calculate_statistic.h"
 
-
-
+extern uint32_t fftSize;
+extern float speedans;
+extern Sv statistic_value;
 float Calculate_rms(float *data, int n)
 {
 	float32_t rmsAns = 0;
@@ -149,7 +150,41 @@ float Calculate_FreqOverAll(float *x, int n)
 		ParsevalFftPower += x[i] * x[i];
 	}
 
+	int fftSize = 4096;
+	/*
+	 * Compute Speed Ovall
+	 *
+	 * */
+	float32_t sampleCount = 4096;
+	float32_t samplingRate = 15000;
+	float32_t frequencyScale = samplingRate/sampleCount;
+	float SpeedparsevalFftPower = 0;
+
+	for(uint16_t i = 1; i < fftSize; i++)
+	{
+		if(i < fftSize/2)
+		{
+			if(i ==0)
+			{
+				x[i] = x[i];
+			}
+			else
+			{
+				x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyScale * i);
+			}
+
+		}
+		else if(i > fftSize/2)
+		{
+			x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyScale * abs(fftSize-i));
+		}
+		SpeedparsevalFftPower += x[i] * x[i];
+	}
+
+
+
 	ans = sqrt(ParsevalFftPower)/n;
+	statistic_value.Statistic_SpeedOvall = sqrt(SpeedparsevalFftPower)/n;
 	return ans;
 }
 
