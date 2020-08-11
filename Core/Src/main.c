@@ -256,7 +256,7 @@ int main(void)
    //F2B.f = 1.4567;
 
    //Initialize delay systick
-   delay_init(122);
+   delay_init(216);
    TM_Delay_Init();
 
    readIICEEPROM_2402C();
@@ -815,6 +815,10 @@ void FFT_Thread(void const * argument)
 	 				testOutput[4] = 0;
 	 				testOutput[5] = 0;
 	 				testOutput[6] = 0;
+	 				testOutput[7] = 0;
+	 				testOutput[8] = 0;
+	 				testOutput[4088] = 0;
+	 				testOutput[4089] = 0;
 	 				testOutput[4090] = 0;
 	 				testOutput[4091] = 0;
 	 				testOutput[4092] = 0;
@@ -855,8 +859,7 @@ void FFT_Thread(void const * argument)
 	 					statistic_value.Statistic_std_Temp = statistic_value.Statistic_std;
 	 					statistic_value.Statistic_FreqOvall_Temp = statistic_value.Statistic_FreqOvall;
 	 					statistic_value.Statistic_crestFactor_Temp = statistic_value.Statistic_crestFactor;
-	 					statistic_value.Statistic_kurtosis_Temp = statistic_value.Statistic_crestFactor;
-
+	 					statistic_value.Statistic_SpeedOvall_Temp = statistic_value.Statistic_SpeedOvall;
 	 				}
 	 				if(averageTimes == 2)
 	 				{
@@ -868,7 +871,7 @@ void FFT_Thread(void const * argument)
 	 					statistic_value.Statistic_std_Temp += statistic_value.Statistic_std;
 	 					statistic_value.Statistic_FreqOvall_Temp += statistic_value.Statistic_FreqOvall;
 	 					statistic_value.Statistic_crestFactor_Temp += statistic_value.Statistic_crestFactor;
-
+	 					statistic_value.Statistic_SpeedOvall_Temp += statistic_value.Statistic_SpeedOvall;
 	 				}
 	 				if(averageTimes == 3)
 	 				{
@@ -888,6 +891,10 @@ void FFT_Thread(void const * argument)
 	 							statistic_value.Statistic_FreqOvall) / 3;
 	 					statistic_value.Statistic_crestFactor = (statistic_value.Statistic_crestFactor_Temp +
 	 							statistic_value.Statistic_crestFactor) / 3;
+	 					statistic_value.Statistic_SpeedOvall = (statistic_value.Statistic_SpeedOvall_Temp +
+	 							statistic_value.Statistic_SpeedOvall) / 3;
+
+
 
 	 					USARTBLE.sendflag = 1;
 	 					averageTimes = 0;

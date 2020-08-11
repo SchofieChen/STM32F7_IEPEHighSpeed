@@ -1,2 +1,2 @@
 core_cm7.h:2147:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
-BLE_USART.c:16:6:BLE_USART	80	static
+BLE_USART.c:16:6:BLE_USART	88	static

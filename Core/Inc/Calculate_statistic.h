@@ -37,7 +37,7 @@ typedef struct Statistic_value
 	float Statistic_kurtosis_Temp;
 	float Statistic_skewness_Temp;
 	float Statistic_FreqOvall_Temp;
-
+	float Statistic_SpeedOvall_Temp;
 }Sv;
 
 struct Freq_settingValue
