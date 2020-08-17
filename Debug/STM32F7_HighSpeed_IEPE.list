@@ -5852,44 +5852,44 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 
 
 
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b454:	683b      	ldr	r3, [r7, #0]
  800b456:	edd3 7a09 	vldr	s15, [r3, #36]	; 0x24
  800b45a:	eeb7 7ae7 	vcvt.f64.f32	d7, s15
 				sendpData->Statistic_max,sendpData->Statistic_min,sendpData->Statistic_var,sendpData->Statistic_rms,
  800b45e:	683b      	ldr	r3, [r7, #0]
  800b460:	edd3 6a00 	vldr	s13, [r3]
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b464:	eeb7 6ae6 	vcvt.f64.f32	d6, s13
 				sendpData->Statistic_max,sendpData->Statistic_min,sendpData->Statistic_var,sendpData->Statistic_rms,
  800b468:	683b      	ldr	r3, [r7, #0]
  800b46a:	edd3 5a01 	vldr	s11, [r3, #4]
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b46e:	eeb7 5ae5 	vcvt.f64.f32	d5, s11
 				sendpData->Statistic_max,sendpData->Statistic_min,sendpData->Statistic_var,sendpData->Statistic_rms,
  800b472:	683b      	ldr	r3, [r7, #0]
  800b474:	edd3 4a02 	vldr	s9, [r3, #8]
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b478:	eeb7 4ae4 	vcvt.f64.f32	d4, s9
 				sendpData->Statistic_max,sendpData->Statistic_min,sendpData->Statistic_var,sendpData->Statistic_rms,
  800b47c:	683b      	ldr	r3, [r7, #0]
  800b47e:	edd3 3a03 	vldr	s7, [r3, #12]
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b482:	eeb7 3ae3 	vcvt.f64.f32	d3, s7
 				sendpData->Statistic_mean, sendpData->Statistic_crestFactor,sendpData->Statistic_SpeedOvall);
  800b486:	683b      	ldr	r3, [r7, #0]
  800b488:	edd3 2a04 	vldr	s5, [r3, #16]
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b48c:	eeb7 2ae2 	vcvt.f64.f32	d2, s5
 				sendpData->Statistic_mean, sendpData->Statistic_crestFactor,sendpData->Statistic_SpeedOvall);
  800b490:	683b      	ldr	r3, [r7, #0]
  800b492:	edd3 1a06 	vldr	s3, [r3, #24]
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b496:	eeb7 1ae1 	vcvt.f64.f32	d1, s3
 				sendpData->Statistic_mean, sendpData->Statistic_crestFactor,sendpData->Statistic_SpeedOvall);
  800b49a:	683b      	ldr	r3, [r7, #0]
  800b49c:	edd3 0a0a 	vldr	s1, [r3, #40]	; 0x28
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%4f", sendpData->Statistic_FreqOvall,
+		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
  800b4a0:	eeb7 0ae0 	vcvt.f64.f32	d0, s1
  800b4a4:	ed8d 0b0e 	vstr	d0, [sp, #56]	; 0x38
  800b4a8:	ed8d 1b0c 	vstr	d1, [sp, #48]	; 0x30
@@ -8072,6 +8072,7 @@ void FFT_Thread(void const * argument)
  800c31c:	4b8c      	ldr	r3, [pc, #560]	; (800c550 <FFT_Thread+0x328>)
  800c31e:	edc3 7a00 	vstr	s15, [r3]
 
+	 				/*Remove DC component*/
 	 				testOutput[1] = 0;
  800c322:	4b89      	ldr	r3, [pc, #548]	; (800c548 <FFT_Thread+0x320>)
  800c324:	f04f 0200 	mov.w	r2, #0
@@ -8531,6 +8532,8 @@ void FFT_Thread(void const * argument)
  800c70e:	4b09      	ldr	r3, [pc, #36]	; (800c734 <FFT_Thread+0x50c>)
  800c710:	2200      	movs	r2, #0
  800c712:	701a      	strb	r2, [r3, #0]
+
+	 					/*BLE send data*/
 	 					BLE_USART(&huart6, &statistic_value);
  800c714:	4906      	ldr	r1, [pc, #24]	; (800c730 <FFT_Thread+0x508>)
  800c716:	4809      	ldr	r0, [pc, #36]	; (800c73c <FFT_Thread+0x514>)

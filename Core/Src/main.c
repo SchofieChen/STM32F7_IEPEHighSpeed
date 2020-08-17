@@ -809,6 +809,7 @@ void FFT_Thread(void const * argument)
 
 	 				maxValue = maxValue*2 / dataLength;
 
+	 				/*Remove DC component*/
 	 				testOutput[1] = 0;
 	 				testOutput[2] = 0;
 	 				testOutput[3] = 0;
@@ -898,6 +899,8 @@ void FFT_Thread(void const * argument)
 
 	 					USARTBLE.sendflag = 1;
 	 					averageTimes = 0;
+
+	 					/*BLE send data*/
 	 					BLE_USART(&huart6, &statistic_value);
 
 	 				}
