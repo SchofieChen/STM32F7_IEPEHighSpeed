@@ -36,9 +36,9 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 
 
 
-		snprintf_(USARTBLE.buffer, 128 , "%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f,%5f", sendpData->Statistic_FreqOvall,
-				sendpData->Statistic_max,sendpData->Statistic_min,sendpData->Statistic_var,sendpData->Statistic_rms,
-				sendpData->Statistic_mean, sendpData->Statistic_crestFactor,sendpData->Statistic_SpeedOvall);
+		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f", sendpData->Statistic_FreqOvall*1000,
+				sendpData->Statistic_SpeedOvall*100,sendpData->Statistic_max*1000,sendpData->Statistic_min*1000,
+				sendpData->Statistic_var*1000,sendpData->Statistic_crestFactor*1000);
 
 		USARTBLE.bufferSize = min_(APP_BUFFER_SIZE, strlen(USARTBLE.buffer));
 		USARTBLE.sendTimeout = 100 ;
