@@ -97,7 +97,7 @@ union FLOAT_BYTE
 
 
 /*
- * Define STM32 Studio charting value
+ *TODO: Define STM32 Studio charting value
  * */
 uint8_t id=0;
 float data;
@@ -106,7 +106,7 @@ int32_t read = 0;
 
 /*
  *
- * For FFT_Thread Bluetooth transmit
+ * TODO: For FFT_Thread Bluetooth transmit
  * using moving average while variable times is 3
  * variable : d
  *
@@ -115,7 +115,7 @@ uint8_t averageTimes = 0;
 
 
 /*
- * Define send to ADC message
+ * TODO: Define send to ADC message
  * */
 uint8_t RDATACsend_data[3] = {0xff,0xff,0xff};
 uint8_t Databuffer[3] = {0x00,0x00,0x00};
@@ -123,7 +123,7 @@ uint8_t RDATACcmdbuffer[1] = {CMD_RDATAC};
 uint8_t SDATACcmduffer[1] = {CMD_SDATAC};
 
 /*
- * FFT using
+ * TODO: FFT using
  * */
 uint32_t fftSize = 4096;
 uint32_t ifftFlag = 0;
@@ -137,15 +137,21 @@ uint32_t mintestIndex = 0;
 uint32_t dataLength = 0;
 
 
-//IIC EEPROM 2402C
+
+//TODO: FFT set band
+FreqMaxMin * settingValue = 0;
+
+
+
+//TODO: IIC EEPROM 2402C
 uint8_t WriteBufferEEPROM[BufferSize],ReadBufferEEPROM[BufferSize];
 
 uint8_t WriteIICEEPROM[1];
 
-//BLE 080i
+//TODO: BLE 080i
 USART_BLE USARTBLE;
 /*
- * Define Statistic function
+ * TODO:Define Statistic function
  */
 extern Sv statistic_value;
 /* FreeRTOS private variables;*/
@@ -180,7 +186,7 @@ void writeIICEEPROM_2402C(uint8_t *data);
 
 
 /*=============================================================================================================
- * IIC Function
+ * TODO: IIC Function
  *
  *
  * */
@@ -201,7 +207,7 @@ void writeIICEEPROM_2402C(uint8_t *data)
 }
 
 
-//extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
+//TODO: extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
 float32_t testOutput[FFT_LENGTH_SAMPLES/2];
 float *dataRecive[4096];
 float *xdatatoSend = ADS1256.data_buffer;
@@ -252,29 +258,38 @@ int main(void)
   statisticDataSet = rawData;
    dataLength = sizeof(dataRecive)/sizeof(float);
 
-   //Initialize ADS1256 data buffer size
+   //TODO: Initialize ADS1256 data buffer size
    ADS1256.data_index = 0;
    ADS1256.data_length = dataLength;
 
-   //Initialize Frequency range to collection to feature
+  //TODO: Set freq band
+	freqSettingValueList.range1.Max = 1650;
+	freqSettingValueList.range1.Min = 20;
+	freqSettingValueList.range2.Max = 2600;
+	freqSettingValueList.range2.Min = 2300;
+	freqSettingValueList.range3.Max = 3000;
+	freqSettingValueList.range3.Min = 1650;
+
+
+   //TODO: Initialize Frequency range to collection to feature
    //F2B.f = 1.4567;
 
-   //Initialize delay systick
+   //TODO: Initialize delay systick
    delay_init(216);
    TM_Delay_Init();
 
    readIICEEPROM_2402C();
-   //Reset ADS1256
+   //TODO: Reset ADS1256
    writeCMD(CMD_RESET);
    delay_ms(10);
    TM_DelayMicros(1);
 
-   //Initialize ADS1256 parameter (Buffer, PGA, Sampling rate)
+   //TODO: Initialize ADS1256 parameter (Buffer, PGA, Sampling rate)
    setBuffer();
    setPGA(PGA_GAIN1);
    setDataRate(DRATE_15000);
 
-   //Read chip id
+   //TODO: Read chip id
    id = readChipID();
 
    delay_ms(500);// wait for initialization
@@ -282,7 +297,7 @@ int main(void)
    uint8_t  posChannels [4] = {AIN0, AIN2, AIN4, AIN6};
    uint8_t  negChannels [4] = {AIN1, AIN3, AIN5, AIN7};
 
-   // Set differential analog input channel.
+   //TODO: Set differential analog input channel.
    setDIFFChannel(posChannels[0], negChannels[0]);
    delay_us(15);
    writeCMD(CMD_SYNC);    // SYNC command
@@ -292,7 +307,7 @@ int main(void)
 
 
 
-   // Set continuous mode.
+   //TODO: Set continuous mode.
 
 	waitDRDY();
 	CS_0();
@@ -342,7 +357,7 @@ int main(void)
   ADC_TaskHandle = osThreadCreate(osThread(ADC_Task), NULL);
 
   /* definition and creation of FFT_Task */
-  osThreadDef(FFT_Task, FFT_Thread, osPriorityHigh, 0, 200);
+  osThreadDef(FFT_Task, FFT_Thread, osPriorityHigh, 0, 400);
   FFT_TaskHandle = osThreadCreate(osThread(FFT_Task), NULL);
 
   /* definition and creation of LED_Task */
@@ -772,7 +787,7 @@ void ADC_Thread(void const * argument)
 				if(ADS1256.data_index == ADS1256.data_length) //divide 2 for FFT real data equal 4096
 				{
 
-					/*send data to buffer*/
+					/*TODO: send data to buffer*/
 					BaseType_t xStatus;
 					xStatus = xQueueSendToBack(adcQueueHandle, &xdatatoSend , 0);
 					queueCount = uxQueueMessagesWaiting(adcQueueHandle);
@@ -824,18 +839,18 @@ void FFT_Thread(void const * argument)
 	 			if(xStatus == pdPASS)
 	 			{
 
-	 				/* Process the data through the CFFT/CIFFT module */
+	 				/*TODO: Process the data through the CFFT/CIFFT module */
 	 				arm_cfft_f32(&arm_cfft_sR_f32_len4096, FFTdata, ifftFlag, doBitReverse);
 
-	 				/* Process the data through the Complex Magnitude Module for
+	 				/*TODO: Process the data through the Complex Magnitude Module for
 	 				calculating the magnitude at each bin */
 	 				arm_cmplx_mag_f32(FFTdata, testOutput, fftSize);
 
-	 				/* Calculates maxValue and returns corresponding BIN value */
+	 				/*TODO: Calculates maxValue and returns corresponding BIN value */
 	 				arm_max_f32(testOutput, fftSize, &maxValue, &testIndex);
 
 	 			     /*
-	 				 * the testOutput in python  ==> testOutput = yf = abs(fft(signal = testInput_f32_10khz))
+	 				 * TODO: the testOutput in python  ==> testOutput = yf = abs(fft(signal = testInput_f32_10khz))
 	 				 * so we can make a new array like yf2 = 2/N * np.abs(yf[0:N//2]); in python
 	 				 * It kindly would be
 	 				 *  testOutput[] = 2/N * testOutput[0:N/2]
@@ -844,7 +859,7 @@ void FFT_Thread(void const * argument)
 
 	 				maxValue = maxValue*2 / dataLength;
 
-	 				/*Remove DC component*/
+	 				/*TODO: Remove DC component*/
 	 				testOutput[1] = 0;
 	 				testOutput[2] = 0;
 	 				testOutput[3] = 0;
@@ -862,13 +877,20 @@ void FFT_Thread(void const * argument)
 	 				testOutput[4094] = 0;
 	 				testOutput[4095] = 0;
 	 				/* focus broad band functionality
+	 				 *
 	 				for(int i =0; i<14; i++)
 	 				{
 	 					Calculate_FreqMax(testOutput,*((&freq_settingValue.freq1)+i), i);
 	 				}
 	 				 */
 
-	 				/*Calculate math function*/
+					/* focus broad band functionality */
+					for(int i =0; i<sizeof(FreqSettingValueList)/sizeof(FreqMaxMin); i++)
+					{
+						settingValue = (&freqSettingValueList.range1+i);
+						Calculate_FreqMax(testOutput, settingValue, i);
+					}
+	 				/*TODO: Calculate math function*/
 	 				statistic_value.Statistic_FreqOvall = Calculate_FreqOverAll(testOutput, dataLength);
 
 	 				arm_max_f32(statisticDataSet, dataLength, &statistic_value.Statistic_max, &maxtestIndex);
@@ -879,11 +901,11 @@ void FFT_Thread(void const * argument)
 	 				arm_std_f32(statisticDataSet, dataLength, &statistic_value.Statistic_std);
 	 				statistic_value.Statistic_crestFactor = statistic_value.Statistic_max/statistic_value.Statistic_rms;
 
-	 				/*Calculate skewness and kurtosis will cause delay*/
+	 				/*TODO: Calculate skewness and kurtosis will cause delay*/
 	 				//statistic_value.Statistic_kurtosis = Calculate_kurtosis(statisticDataSet, dataLength);
 	 				//statistic_value.Statistic_skewness = Calculate_skewness(statisticDataSet, dataLength);
 
-	 				/*to calculate 3 times moving average*/
+	 				/*TODO: to calculate 3 times moving average*/
 	 				averageTimes++;
 	 				if(averageTimes == 1)
 	 				{
@@ -935,7 +957,7 @@ void FFT_Thread(void const * argument)
 	 					USARTBLE.sendflag = 1;
 	 					averageTimes = 0;
 
-	 					/*BLE send data*/
+	 					/*TODO: BLE send data*/
 	 					BLE_USART(&huart6, &statistic_value);
 
 	 				}

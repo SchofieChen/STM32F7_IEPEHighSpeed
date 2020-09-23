@@ -31,7 +31,8 @@ Core/Src/BLE_USART.o: ../Core/Src/BLE_USART.c ../Core/Inc/main.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h \
  ../Core/Inc/BLE_USART.h ../Core/Src/printf.h \
- ../Core/Inc/Calculate_statistic.h ../Core/Inc/arm_math.h
+ ../Core/Inc/Calculate_statistic.h ../Core/Inc/arm_math.h \
+ ../Core/Inc/Delay.h
 
 ../Core/Inc/main.h:
 
@@ -104,3 +105,5 @@ Core/Src/BLE_USART.o: ../Core/Src/BLE_USART.c ../Core/Inc/main.h \
 ../Core/Inc/Calculate_statistic.h:
 
 ../Core/Inc/arm_math.h:
+
+../Core/Inc/Delay.h:

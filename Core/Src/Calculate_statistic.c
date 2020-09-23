@@ -41,37 +41,29 @@ float Calculate_max(float *data)
 
 		return max;
 }
-float Calculate_FreqMax(float *data, int freqSettingValue, int8_t freq_index)
+void Calculate_FreqMax(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_index)
 {
-	if(freqSettingValue != 0)
+	if(FreqMaxMin->Max != 0)
 	{
-		volatile float temp = 0;
-			if(freqSettingValue < 25)
-			{
-				for(int i = freqSettingValue- 25; i<freqSettingValue + 25; i++)
-					{
 
-						if(data[i] > temp)
-						{
-							temp += data[i];
-						}
-					}
-			}
-			else
-			{
+		int DATARE = 15000;
+		float frequencyResolution = 15000/(float)fftSize;
+		float ans = 0;
+		//DRATE_15000 = 15000
+		float parseRangeMax = FreqMaxMin->Max / frequencyResolution;
+		float parseRangeMin = FreqMaxMin->Min / frequencyResolution;
+		float ParsevalFftPower = 0;
 
-				for(int i = freqSettingValue; i<freqSettingValue + 25; i++)
-					{
+		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
+		{
+			//FFTRMSArray[i] = (testOutput[i]*2)/4096;
+			ParsevalFftPower += x[i] * x[i];
+		}
 
-						if(data[i] > temp)
-						{
-							temp += data[i];
-						}
-					}
-			}
-		statistic_value.Statistic_FreqPeak[freq_index] = temp;
-	}
+		ans = sqrt(ParsevalFftPower * 2)/4096;
 
+		statistic_value.Statistic_FreqPeak[freq_index] = ans;
+		}
 }
 
 

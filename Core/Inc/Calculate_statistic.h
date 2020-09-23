@@ -3,13 +3,20 @@
 #include <math.h>
 #include <stdlib.h>
 
+typedef struct FreqMaxMinInstance
+{
+    int Max;
+    int Min;
+}FreqMaxMin;
+
 float Calculate_max(float *data);
-float Calculate_FreqMax(float *data,int freqSettingValue, int8_t freq_index);
+void Calculate_FreqMax(float *data,  FreqMaxMin * FreqMaxMin , int8_t freq_index);
 float Calculate_skewness(float *data, int n);
 float Calculate_kurtosis(float *data, int n);
 float Calculate_rms(float *data, int n);
 float Calculate_FreqOverAll(float *data, int n);
 float Calculate_SpeedOverAll(float *x, int n);
+
 
 typedef struct Statistic_value
 {
@@ -59,5 +66,12 @@ struct Freq_settingValue
 
 }freq_settingValue;
 
+typedef struct FreqSettingValueList
+{
+    FreqMaxMin range1;
+    FreqMaxMin range2;
+    FreqMaxMin range3;
+}FreqSettingValueList;
 
+FreqSettingValueList freqSettingValueList;
 Sv statistic_value;
