@@ -99,6 +99,7 @@ union FLOAT_BYTE
 /*
  *TODO: Define STM32 Studio charting value
  * */
+uint8_t tempid=0;
 uint8_t id=0;
 float data;
 int32_t read = 0;
@@ -257,6 +258,11 @@ int main(void)
 
   statisticDataSet = rawData;
    dataLength = sizeof(dataRecive)/sizeof(float);
+
+   //TODO: Test BLE command
+   char str[] ="This is a simple string aaa";
+
+   _Bool command = checkBLECommandFromBLEGateway(str);
 
    //TODO: Initialize ADS1256 data buffer size
    ADS1256.data_index = 0;
@@ -743,6 +749,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   /* Prevent unused argument(s) compilation warning */
   UNUSED(huart);
 
+	//TODO: check data is
+
   //if(aRxBuffer[5] == '2' & aRxBuffer[6]=='4' & aRxBuffer[7]=='4')
   //{
   USARTBLE.IAPflag =1;
@@ -960,6 +968,7 @@ void FFT_Thread(void const * argument)
 	 					/*TODO: BLE send data*/
 	 					BLE_USART(&huart6, &statistic_value);
 
+
 	 				}
 
 	 				//snprintf_(bb,20, "%.3f Pa", statistic_value.Statistic_max);
@@ -967,6 +976,7 @@ void FFT_Thread(void const * argument)
 
 
 	 				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+
 	 			}
 
 	 			/*If there is no data in queue, start ads1256 conversion*/

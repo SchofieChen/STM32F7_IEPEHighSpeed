@@ -7,6 +7,7 @@
 #include "printf.h"
 #include "Calculate_statistic.h"
 #include "Delay.h"
+#include <stdbool.h>
 /* Private typedef -----------------------------------------------------------*/
 extern USART_BLE USARTBLE;	//Wayne0905
 
@@ -15,6 +16,7 @@ extern USART_BLE USARTBLE;	//Wayne0905
 
 void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 {
+
 	if( USARTBLE.IAPflag == 1)
 	{
 		USARTBLE.sendflag =0;
@@ -55,3 +57,31 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 		 //0x1;
 	}
 }
+
+_Bool checkBLECommandFromBLEGateway(char * BLEcommand)
+{
+	if(strlen(BLEcommand) > 0)
+	{
+		   //Test 比對 function
+	   char * pch;
+	   /* 找尋 simple 字串 */
+	   pch = strstr (BLEcommand,"simple");
+	   if(strncmp(pch, "simple", 6) == 0) {
+		   return true;
+		   __NOP();
+	   }
+	   else
+	   {
+		   return false;
+		   __NOP();
+	   }
+
+	}
+	else
+	{
+
+		return false;
+	}
+
+}
+
