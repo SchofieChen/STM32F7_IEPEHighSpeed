@@ -22,9 +22,11 @@ typedef struct
 	_Bool IAPflag;
 	//usart transfermit
 	char Msg[APP_BUFFER_SIZE];
-	unsigned char __attribute__ ((aligned (32))) buffer[APP_BUFFER_SIZE];
-	unsigned char __attribute__ ((aligned (32))) Rbuffer[APP_BUFFER_SIZE];
+	char __attribute__ ((aligned (32))) buffer[APP_BUFFER_SIZE];
+	char __attribute__ ((aligned (32))) Rbuffer[APP_BUFFER_SIZE];
 	uint32_t sendTimeout;
 	uint32_t bufferSize;
 
 } USART_BLE;
+
+

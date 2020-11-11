@@ -13,7 +13,7 @@ extern USART_BLE USARTBLE;	//Wayne0905
 
 /* Private variables ---------------------------------------------------------*/
 
-
+void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData);
 void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 {
 
@@ -36,7 +36,6 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 	if(USARTBLE.sendflag ==1)
 	{
 
-
 		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f", sendpData->Statistic_FreqOvall*1000,
 					sendpData->Statistic_max*1000,sendpData->Statistic_var*1000,sendpData->Statistic_crestFactor*1000,
 					statistic_value.Statistic_FreqPeak[0]*1000,statistic_value.Statistic_FreqPeak[1]*10000,
@@ -44,7 +43,7 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 
 		USARTBLE.bufferSize = min_(APP_BUFFER_SIZE, strlen(USARTBLE.buffer));
 		//USARTBLE.sendTimeout = 100 ;
-		if(HAL_UART_Transmit_DMA(huart, USARTBLE.buffer, USARTBLE.bufferSize)==HAL_OK)
+		if(HAL_UART_Transmit_DMA(huart, (uint8_t *)USARTBLE.buffer, USARTBLE.bufferSize)==HAL_OK)
 		{
 			__NOP();
 		}
