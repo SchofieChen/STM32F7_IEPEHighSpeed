@@ -893,6 +893,9 @@ void FFT_Thread(void const * argument)
 	 				testOutput[4093] = 0;
 	 				testOutput[4094] = 0;
 	 				testOutput[4095] = 0;
+
+
+
 	 				/* focus broad band functionality
 	 				 *
 	 				for(int i =0; i<14; i++)
@@ -902,6 +905,8 @@ void FFT_Thread(void const * argument)
 	 				 */
 
 					/* focus broad band functionality */
+
+
 					for(int i =0; i<sizeof(FreqSettingValueList)/sizeof(FreqMaxMin); i++)
 					{
 						settingValue = (&freqSettingValueList.range1+i);
