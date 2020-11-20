@@ -7896,8 +7896,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
  800c1f8:	781b      	ldrb	r3, [r3, #0]
  800c1fa:	2b00      	cmp	r3, #0
  800c1fc:	d117      	bne.n	800c22e <HAL_GPIO_EXTI_Callback+0x5e>
-
-
+	{
 		    /* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE because it will get set to pdTRUE inside the interrupt-safe API function if a context switch is required. */
 
 		BaseType_t xHigherPriorityTaskWoken;
@@ -8472,11 +8471,11 @@ void FFT_Thread(void const * argument)
  800c5ec:	4413      	add	r3, r2
  800c5ee:	f04f 0200 	mov.w	r2, #0
  800c5f2:	601a      	str	r2, [r3, #0]
-	 					Calculate_FreqMax(testOutput,*((&freq_settingValue.freq1)+i), i);
-	 				}
 	 				 */
 
 					/* focus broad band functionality */
+
+
 					for(int i =0; i<sizeof(FreqSettingValueList)/sizeof(FreqMaxMin); i++)
  800c5f4:	2300      	movs	r3, #0
  800c5f6:	613b      	str	r3, [r7, #16]
