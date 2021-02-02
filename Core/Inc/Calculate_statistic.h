@@ -16,7 +16,7 @@ float Calculate_kurtosis(float *data, int n);
 float Calculate_rms(float *data, int n);
 float Calculate_FreqOverAll(float *data, int n);
 float Calculate_SpeedOverAll(float *x, int n);
-
+void Initial_AllStatisticValue();
 
 typedef struct Statistic_value
 {

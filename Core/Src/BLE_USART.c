@@ -36,25 +36,20 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 	if(USARTBLE.sendflag ==1)
 	{
 
-
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f", sendpData->Statistic_FreqOvall*1000,
-					sendpData->Statistic_max*1000,sendpData->Statistic_var*1000,sendpData->Statistic_crestFactor*1000,
+		//2021/0201/George
+		//TODO : BLE transmission parameter number3 from var to min and
+		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f", sendpData->Statistic_FreqOvall*1000,sendpData->Statistic_SpeedOvall*1000,
+					sendpData->Statistic_max*1000,sendpData->Statistic_min*1000,sendpData->Statistic_crestFactor*1000,
 					statistic_value.Statistic_FreqPeak[0]*1000,statistic_value.Statistic_FreqPeak[1]*10000,
 					statistic_value.Statistic_FreqPeak[2]*10000);
 
 		USARTBLE.bufferSize = min_(APP_BUFFER_SIZE, strlen(USARTBLE.buffer));
-		//USARTBLE.sendTimeout = 100 ;
+
 		if(HAL_UART_Transmit_DMA(huart, USARTBLE.buffer, USARTBLE.bufferSize)==HAL_OK)
 		{
 			__NOP();
 		}
-		/*
-		 HAL_UART_Receive(huart , &USARTBLE.Rbuffer, 14, 1000);
 
-		 char C[20];
-		 strcpy(C,  USARTBLE.Rbuffer );
-		 */
-		 //0x1;
 	}
 }
 

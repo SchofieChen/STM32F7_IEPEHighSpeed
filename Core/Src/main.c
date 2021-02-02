@@ -204,6 +204,7 @@ void writeIICEEPROM_2402C(uint8_t *data)
 		}
 }
 
+//2021/02/01
 
 //TODO: extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
 float32_t testOutput[FFT_LENGTH_SAMPLES/2];
@@ -213,6 +214,101 @@ float FFTdata[8192];
 float rawData[4096];
 
 float speedans = 0;
+
+
+
+//2021/0201/George
+//TODO: FFT Task Flag
+uint8_t stattisComputingStatus = 0;
+
+enum statisticComputingFlag
+{
+	statisticComputingNORMAL = 0,
+	statisticComputingBUSY = 1,
+}statisticComputingFlag;
+
+
+//2021/0201/George
+//TODO: InitialParameter
+void initialBootloaderParameter()
+{
+	USARTBLE.RxCount=0;
+	HAL_UART_Receive_IT(&huart6, (uint8_t *)aRxBuffer, 1);
+	__enable_irq();
+}
+
+//2021/0201/George
+//TODO : Initialize ADS1256 data buffer size
+void initialADS1256DataBuffer()
+{
+	  statisticDataSet = rawData;
+	  dataLength = sizeof(dataRecive)/sizeof(float);
+	  ADS1256.data_index = 0;
+	  ADS1256.data_length = dataLength;
+}
+
+//2021/0202/George
+//TODO: Set freq band
+void InitialSetFreqStatisticBand()
+{
+	freqSettingValueList.range1.Max = 1650;
+	freqSettingValueList.range1.Min = 20;
+	freqSettingValueList.range2.Max = 2600;
+	freqSettingValueList.range2.Min = 2300;
+	freqSettingValueList.range3.Max = 3000;
+	freqSettingValueList.range3.Min = 1650;
+}
+
+//2021/0202/George
+//TODO: Initialize delay systick
+void InitialDelayFunction()
+{
+	   delay_init(216);
+	   TM_Delay_Init();
+}
+
+//2021/0202/George
+//TODO: Initialize ADS1256 parameter
+void InitialADS1256Register()
+{
+	//TODO: Reset ADS1256
+	   writeCMD(CMD_RESET);
+	   delay_ms(10);
+	   TM_DelayMicros(1);
+
+	   //TODO: Initialize ADS1256 parameter (Buffer, PGA, Sampling rate)
+	   setBuffer();
+	   setPGA(PGA_GAIN1);
+	   setDataRate(DRATE_15000);
+
+	   //TODO: Read chip id
+	   id = readChipID();
+
+	   delay_ms(500);// wait for initialization
+
+	   uint8_t  posChannels [4] = {AIN0, AIN2, AIN4, AIN6};
+	   uint8_t  negChannels [4] = {AIN1, AIN3, AIN5, AIN7};
+
+	   //TODO: Set differential analog input channel.
+	   setDIFFChannel(posChannels[0], negChannels[0]);
+	   delay_us(15);
+	   writeCMD(CMD_SYNC);    // SYNC command
+	   delay_us(10);
+	   writeCMD(CMD_WAKEUP);  // WAKEUP command
+	   delay_us(15); // min delay: t11 = 4 * 1 / 7,68 Mhz = 0,52 micro sec
+
+
+
+	   //TODO: Set continuous mode.
+
+		waitDRDY();
+		CS_0();
+		HAL_SPI_Transmit(&hspi1, RDATACcmdbuffer ,1,50);
+		delay_ms(25); // min delay: t6 = 50 * 1/7.68 MHz = 6.5 microseconds
+		ADS1256.data_startFlag = 1;
+		delay_us(1);
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -250,79 +346,24 @@ int main(void)
   MX_I2C2_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
-  USARTBLE.RxCount=0;
-  HAL_UART_Receive_IT(&huart6, (uint8_t *)aRxBuffer, 1);
-  __enable_irq();
+  //2021/0201/George
+  //TODO: InitialParameter
+  initialBootloaderParameter();
+  initialADS1256DataBuffer();
 
-  statisticDataSet = rawData;
-   dataLength = sizeof(dataRecive)/sizeof(float);
-
-   //TODO: Test BLE command
-   //char str[] ="This is a simple string aaa";
-
-   //_Bool command = checkBLECommandFromBLEGateway(str ,str);
-
-   //TODO: Initialize ADS1256 data buffer size
-   ADS1256.data_index = 0;
-   ADS1256.data_length = dataLength;
-
-  //TODO: Set freq band
-	freqSettingValueList.range1.Max = 1650;
-	freqSettingValueList.range1.Min = 20;
-	freqSettingValueList.range2.Max = 2600;
-	freqSettingValueList.range2.Min = 2300;
-	freqSettingValueList.range3.Max = 3000;
-	freqSettingValueList.range3.Min = 1650;
-
-
+   //2021/0201/George
    //TODO: Initialize Frequency range to collection to feature
-   //F2B.f = 1.4567;
+   InitialSetFreqStatisticBand();
 
    //TODO: Initialize delay systick
-   delay_init(216);
-   TM_Delay_Init();
+   InitialDelayFunction();
 
+   //2021/0202/George
+   //TODO: Testing EEProm
    readIICEEPROM_2402C();
-   //TODO: Reset ADS1256
-   writeCMD(CMD_RESET);
-   delay_ms(10);
-   TM_DelayMicros(1);
 
-   //TODO: Initialize ADS1256 parameter (Buffer, PGA, Sampling rate)
-   setBuffer();
-   setPGA(PGA_GAIN1);
-   setDataRate(DRATE_15000);
-
-   //TODO: Read chip id
-   id = readChipID();
-
-   delay_ms(500);// wait for initialization
-
-   uint8_t  posChannels [4] = {AIN0, AIN2, AIN4, AIN6};
-   uint8_t  negChannels [4] = {AIN1, AIN3, AIN5, AIN7};
-
-   //TODO: Set differential analog input channel.
-   setDIFFChannel(posChannels[0], negChannels[0]);
-   delay_us(15);
-   writeCMD(CMD_SYNC);    // SYNC command
-   delay_us(10);
-   writeCMD(CMD_WAKEUP);  // WAKEUP command
-   delay_us(15); // min delay: t11 = 4 * 1 / 7,68 Mhz = 0,52 micro sec
-
-
-
-   //TODO: Set continuous mode.
-
-	waitDRDY();
-	CS_0();
-	HAL_SPI_Transmit(&hspi1, RDATACcmdbuffer ,1,50);
-	delay_ms(25); // min delay: t6 = 50 * 1/7.68 MHz = 6.5 microseconds
-	ADS1256.data_startFlag = 1;
-	delay_us(1);
-
-
-
-
+   //TODO: Initialize ADS1256 parameter
+   InitialADS1256Register();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -717,17 +758,40 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 
-	if(GPIO_Pin == GPIO_PIN_3 && id == 3 && ADS1256.data_startFlag == 1 && I2cC.i2cRecive == 0)
+	if(GPIO_Pin == GPIO_PIN_3 && id == 3 && ADS1256.data_startFlag == 1 && I2cC.i2cRecive == 0 && stattisComputingStatus == statisticComputingNORMAL)
 	{
-		    /* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE because it will get set to pdTRUE inside the interrupt-safe API function if a context switch is required. */
 
-		BaseType_t xHigherPriorityTaskWoken;
-		xHigherPriorityTaskWoken = pdFALSE;
-		xSemaphoreGiveFromISR(adcBinarySemHandle,&xHigherPriorityTaskWoken);
+		//2021/0201/George code from ADC Task.
+		//TODO:SPI handshake from ADS1256 24 bit, 8bit(High), 8bit(Medium), 8bit(Low)
+		HAL_SPI_TransmitReceive_DMA(&hspi1,RDATACsend_data,Databuffer,3);
 
-		if(xHigherPriorityTaskWoken == pdTRUE)
+		// construct 24 bit value
+		read  = ((int32_t)Databuffer[0] << 16) & 0x00FF0000; //8bit(High)
+		read |= ((int32_t)Databuffer[1] << 8); //8bit(Medium)
+		read |= Databuffer[2]; //8bit(Low)
+		if (read & 0x800000){ //Determine negative value.
+			read |= 0xFF000000;
+		}
+
+		data = read;
+		data = data / 1677721;
+		ADS1256.data_buffer[ADS1256.data_index] = data; //plus 2 for FFT using
+		ADS1256.data_index++;
+
+		if(ADS1256.data_index == ADS1256.data_length) //divide 2 for FFT real data equal 4096
 		{
-			portEND_SWITCHING_ISR( xHigherPriorityTaskWoken );
+		/* The xHigherPriorityTaskWoken parameter must be initialized to pdFALSE because it will get set to pdTRUE inside the interrupt-safe API function if a context switch is required. */
+			BaseType_t xHigherPriorityTaskWoken;
+			xHigherPriorityTaskWoken = pdFALSE;
+			xSemaphoreGiveFromISR(adcBinarySemHandle,&xHigherPriorityTaskWoken); //Wakeup High Priority Task
+
+				if(xHigherPriorityTaskWoken == pdTRUE)
+				{
+					portEND_SWITCHING_ISR( xHigherPriorityTaskWoken ); //Switch high priority task from ISR
+				}
+
+			ADS1256.data_index = 0;
+			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 		}
 
 	}
@@ -788,40 +852,17 @@ void ADC_Thread(void const * argument)
   for(;;)
   {
 		 if( xSemaphoreTake( adcBinarySemHandle, xMaxExpectedBlockTime ) == pdPASS && I2cC.i2cRecive == 0){
-				HAL_SPI_TransmitReceive_DMA(&hspi1,RDATACsend_data,Databuffer,3);
 
-						// construct 24 bit value
-				read  = ((int32_t)Databuffer[0] << 16) & 0x00FF0000;
-				read |= ((int32_t)Databuffer[1] << 8);
-				read |= Databuffer[2];
-				if (read & 0x800000){
-					read |= 0xFF000000;
+			/*TODO: send data buffer to FFT data buffer*/
+			BaseType_t xStatus;
+			xStatus = xQueueSendToBack(adcQueueHandle, &xdatatoSend , 0);
+			queueCount = uxQueueMessagesWaiting(adcQueueHandle);
 
-				}
-
-				data = read;
-				data = data / 1670000;
-				ADS1256.data_buffer[ADS1256.data_index] = data; //plus 2 for FFT using
-				ADS1256.data_index++;
-				if(ADS1256.data_index == ADS1256.data_length) //divide 2 for FFT real data equal 4096
-				{
-
-					/*TODO: send data to buffer*/
-					BaseType_t xStatus;
-					xStatus = xQueueSendToBack(adcQueueHandle, &xdatatoSend , 0);
-					queueCount = uxQueueMessagesWaiting(adcQueueHandle);
-
-					if(xStatus == pdPASS)
-					{
-						vTaskResume(FFT_TaskHandle);
-					};
-
-
-				  	ADS1256.data_index = 0;
-					HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
-				}
-
-				TM_DelayMicros(8);
+			//TODO: wakeup FFT Task
+			if(xStatus == pdPASS)
+			{
+				vTaskResume(FFT_TaskHandle);
+			};
 		}
   }
   /* USER CODE END 5 */
@@ -847,12 +888,16 @@ void FFT_Thread(void const * argument)
 	 			  queueCount = uxQueueMessagesWaiting(adcQueueHandle);
 
 	 			HAL_IWDG_Refresh(&hiwdg);
+
+	 			//TODO : disable collect data flag
+	 			stattisComputingStatus = statisticComputingBUSY;
+
 	 			for(uint32_t i = 0; i<dataLength; i++)
 	 			{
 	 				//recivedata5 = *(dataRecive[0]+i);
 	 				rawData[i]=*(dataRecive[0]+i);
 	 				FFTdata[i*2] = *(dataRecive[0]+i);
-	 				FFTdata[i*2+1] = 0;
+	 				FFTdata[i*2+1] = 0; // data format like
 	 			}
 
 	 			if(xStatus == pdPASS)
@@ -898,22 +943,15 @@ void FFT_Thread(void const * argument)
 
 
 
-	 				/* focus broad band functionality
-	 				 *
-	 				for(int i =0; i<14; i++)
-	 				{
-	 					Calculate_FreqMax(testOutput,*((&freq_settingValue.freq1)+i), i);
-	 				}
-	 				 */
-
-					/* focus broad band functionality */
-
-
+	 				/* focus broad band functionality */
 					for(int i =0; i<sizeof(FreqSettingValueList)/sizeof(FreqMaxMin); i++)
 					{
 						settingValue = (&freqSettingValueList.range1+i);
 						Calculate_FreqMax(testOutput, settingValue, i);
 					}
+					/* focus broad band functionality */
+
+
 	 				/*TODO: Calculate math function*/
 	 				statistic_value.Statistic_FreqOvall = Calculate_FreqOverAll(testOutput, dataLength);
 
@@ -925,12 +963,16 @@ void FFT_Thread(void const * argument)
 	 				arm_std_f32(statisticDataSet, dataLength, &statistic_value.Statistic_std);
 	 				statistic_value.Statistic_crestFactor = statistic_value.Statistic_max/statistic_value.Statistic_rms;
 
+	 				//2021/02/01/George start compute
 	 				/*TODO: Calculate skewness and kurtosis will cause delay*/
-	 				//statistic_value.Statistic_kurtosis = Calculate_kurtosis(statisticDataSet, dataLength);
-	 				//statistic_value.Statistic_skewness = Calculate_skewness(statisticDataSet, dataLength);
+	 				statistic_value.Statistic_kurtosis = Calculate_kurtosis(statisticDataSet, dataLength);
+	 				statistic_value.Statistic_skewness = Calculate_skewness(statisticDataSet, dataLength);
 
 	 				/*TODO: to calculate 3 times moving average*/
 	 				averageTimes++;
+
+
+
 	 				if(averageTimes == 1)
 	 				{
 	 					statistic_value.Statistic_max_Temp = statistic_value.Statistic_max;
@@ -984,15 +1026,16 @@ void FFT_Thread(void const * argument)
 	 					/*TODO: BLE send data*/
 	 					BLE_USART(&huart6, &statistic_value);
 
+	 					//2021/0201/George
+	 					//TODO : Initial statistic value to zero
+	 					Initial_AllStatisticValue();
 
 	 				}
 
-	 				//snprintf_(bb,20, "%.3f Pa", statistic_value.Statistic_max);
-
-
-
 	 				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
+	 				//TODO : enable collect data flag
+	 				stattisComputingStatus = statisticComputingNORMAL;
 	 			}
 
 	 			/*If there is no data in queue, start ads1256 conversion*/

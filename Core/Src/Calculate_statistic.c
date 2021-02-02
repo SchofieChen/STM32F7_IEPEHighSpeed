@@ -3,6 +3,41 @@
 extern uint32_t fftSize;
 extern float speedans;
 extern Sv statistic_value;
+
+
+//2021/0201/George
+//TODO: Reset All parameter
+void Initial_AllStatisticValue()
+{
+	statistic_value.Statistic_max = 0;
+	statistic_value.Statistic_min = 0;
+	statistic_value.Statistic_var = 0;
+	statistic_value.Statistic_rms = 0;
+	statistic_value.Statistic_mean = 0;
+	statistic_value.Statistic_std = 0;
+	statistic_value.Statistic_crestFactor = 0;
+	statistic_value.Statistic_kurtosis = 0;
+	statistic_value.Statistic_skewness = 0;
+	statistic_value.Statistic_FreqOvall = 0;
+	statistic_value.Statistic_SpeedOvall = 0;
+	statistic_value.Statistic_FreqPeak[20] = 0;
+
+
+	statistic_value.Statistic_max_Temp = 0;
+	statistic_value.Statistic_min_Temp = 0;
+	statistic_value.Statistic_var_Temp = 0;
+	statistic_value.Statistic_rms_Temp = 0;
+	statistic_value.Statistic_mean_Temp = 0;
+	statistic_value.Statistic_std_Temp = 0;
+	statistic_value.Statistic_crestFactor_Temp = 0;
+	statistic_value.Statistic_kurtosis_Temp = 0;
+	statistic_value.Statistic_skewness_Temp = 0;
+	statistic_value.Statistic_FreqOvall_Temp = 0;
+	statistic_value.Statistic_SpeedOvall_Temp = 0;
+
+}
+
+
 float Calculate_rms(float *data, int n)
 {
 	float32_t rmsAns = 0;
@@ -19,28 +54,6 @@ float Calculate_rms(float *data, int n)
 	return *ans;
 }
 
-float Calculate_max(float *data)
-{
-	float max= 0;
-	float mid= 0;  //
-		for(int i = 0;i<4096;i++){
-		/*因為arr[i]是固定的 ，所以可以用arr[i]先和max比較，如果大於max 則
-			把max的值賦給mid的值，然後把arr[i]賦給max  這樣max肯定比mid大*/
-		if(data[i]>max){
-		mid = max;
-		max =data[i];
-
-			}else if(data[i]>mid){/*  另一種情況 arr[i]處於兩者之間*/
-				mid = data[i];//  則吧arr[i]賦給mid
-			}
-
-
-		}
-		printf("max=%d,mid=%d\n",max,mid);
-
-
-		return max;
-}
 void Calculate_FreqMax(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_index)
 {
 	if(FreqMaxMin->Max != 0)
