@@ -55,9 +55,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
-DMA_HandleTypeDef hdma_i2c1_tx;
 
 IWDG_HandleTypeDef hiwdg;
 
@@ -84,60 +82,69 @@ struct I2cCommunication
 	uint8_t i2cSend;
 } I2cC;
 
-
-uint8_t I2cbuffer[3];
-
-
-union FLOAT_BYTE
-{
- float f;
- uint8_t byte[sizeof(float)];
-}F2B;
-
-
-/*
+/*2021/0203/George
  *TODO: Define STM32 Studio charting value
+ *TODO: Parameter:
+ *TODO: id is ADS1256 register ID
+ *TODO: data is used for STMStudio debug using
+ *TODO: read is covert to float data buffer
  * */
-uint8_t tempid=0;
 uint8_t id=0;
 float data;
 int32_t read = 0;
 
 
-/*
- *
+/* 2021/0203/George
  * TODO: For FFT_Thread Bluetooth transmit
  * using moving average while variable times is 3
- * variable : d
- *
+ * Parameter: : averageTimes
  * */
 uint8_t averageTimes = 0;
 
 
-/*
+/* 2021/0203/George
  * TODO: Define send to ADC message
+ * TODO: ADS1256 command
+ * Parameter:
+ * TODO: RDATACsend_data is send to ADS1256
+ * TODO: Databuffer is retrieve data from ADS1256
+ * TODO: RDATACcmdbuffer is send to ADS1256 enable continue mode
+ * TODO: SDATACcmduffer is send to ADS1256 disable continue mode
  * */
 uint8_t RDATACsend_data[3] = {0xff,0xff,0xff};
 uint8_t Databuffer[3] = {0x00,0x00,0x00};
 uint8_t RDATACcmdbuffer[1] = {CMD_RDATAC};
 uint8_t SDATACcmduffer[1] = {CMD_SDATAC};
 
-/*
+
+
+/* 2021/0203/George //2021/02/18/George Addpara samplingRate
  * TODO: FFT using
+ * Parameter:
+ * TODO: samplingRate is ADS1256 sampling rate
+ * TODO: fftSize is fft size
+ * TODO: ifftFlag is fft forward when ifftFlag is 0, ifftFlag is fft inverse when ifftFlag is 1.
+ * TODO: doBitReverse is bitReverseFlag flag that enables (bitReverseFlag=1) or disables (bitReverseFlag=0) bit reversal of output.
+ * TODO: FFTMaxValueIndex is fft max value index
+ * TODO: FFTmaxValue is calculate fft max value
+ * TODO: p* statisticDataSet is point to rawData
+ * TODO: maxtestIndex calculate time-domain max index
+ * TODO: mintestIndex calculate time-domain min index
+ * TODO: dataLength is fft data length
  * */
+uint32_t samplingRate = 15000;
 uint32_t fftSize = 4096;
 uint32_t ifftFlag = 0;
 uint32_t doBitReverse = 1;
-uint32_t FFT_COUINT = 0;
-uint32_t testIndex = 0;
-float32_t maxValue;
+uint32_t FFTMaxValueIndex = 0;
+float32_t FFTmaxValue;
 float32_t *statisticDataSet;
 uint32_t maxtestIndex = 0;
 uint32_t mintestIndex = 0;
 uint32_t dataLength = 0;
 
 
-
+//2021/0203/George
 //TODO: FFT set band
 FreqMaxMin * settingValue = 0;
 
@@ -145,7 +152,6 @@ FreqMaxMin * settingValue = 0;
 
 //TODO: IIC EEPROM 2402C
 uint8_t WriteBufferEEPROM[BufferSize],ReadBufferEEPROM[BufferSize];
-
 uint8_t WriteIICEEPROM[1];
 
 //TODO: BLE 080i
@@ -163,7 +169,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_I2C1_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_IWDG_Init(void);
@@ -207,7 +212,7 @@ void writeIICEEPROM_2402C(uint8_t *data)
 //2021/02/01
 
 //TODO: extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
-float32_t testOutput[FFT_LENGTH_SAMPLES/2];
+float32_t FFTRawData[FFT_LENGTH_SAMPLES/2];
 float *dataRecive[4096];
 float *xdatatoSend = ADS1256.data_buffer;
 float FFTdata[8192];
@@ -251,12 +256,14 @@ void initialADS1256DataBuffer()
 //TODO: Set freq band
 void InitialSetFreqStatisticBand()
 {
-	freqSettingValueList.range1.Max = 1650;
-	freqSettingValueList.range1.Min = 20;
-	freqSettingValueList.range2.Max = 2600;
-	freqSettingValueList.range2.Min = 2300;
-	freqSettingValueList.range3.Max = 3000;
-	freqSettingValueList.range3.Min = 1650;
+	//2021/0204/George
+	//TODO:Total 3 setting frequency broadband parameter
+	freqSettingValueList.range1.Max = 5000;
+	freqSettingValueList.range1.Min = 10;
+	freqSettingValueList.range2.Max = 1000;
+	freqSettingValueList.range2.Min = 10;
+	freqSettingValueList.range3.Max = 5000;
+	freqSettingValueList.range3.Min = 1000;
 }
 
 //2021/0202/George
@@ -341,7 +348,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
-  MX_I2C1_Init();
   MX_USART6_UART_Init();
   MX_I2C2_Init();
   MX_IWDG_Init();
@@ -355,6 +361,7 @@ int main(void)
    //TODO: Initialize Frequency range to collection to feature
    InitialSetFreqStatisticBand();
 
+   //2021/0202/George
    //TODO: Initialize delay systick
    InitialDelayFunction();
 
@@ -362,6 +369,7 @@ int main(void)
    //TODO: Testing EEProm
    readIICEEPROM_2402C();
 
+   //2021/0202/George
    //TODO: Initialize ADS1256 parameter
    InitialADS1256Register();
   /* USER CODE END 2 */
@@ -474,61 +482,13 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART6|RCC_PERIPHCLK_I2C1
-                              |RCC_PERIPHCLK_I2C2;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART6|RCC_PERIPHCLK_I2C2;
   PeriphClkInitStruct.Usart6ClockSelection = RCC_USART6CLKSOURCE_PCLK2;
-  PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   PeriphClkInitStruct.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief I2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C1_Init(void)
-{
-
-  /* USER CODE BEGIN I2C1_Init 0 */
-
-  /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
-
-  /* USER CODE END I2C1_Init 1 */
-  hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x20404768;
-  hi2c1.Init.OwnAddress1 = 4;
-  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2 = 0;
-  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_ENABLE;
-  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Analogue filter
-  */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure Digital filter
-  */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2C1_Init 2 */
-
-  /* USER CODE END I2C1_Init 2 */
-
 }
 
 /**
@@ -688,13 +648,9 @@ static void MX_DMA_Init(void)
 {
 
   /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
   __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
-  /* DMA1_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
@@ -908,52 +864,79 @@ void FFT_Thread(void const * argument)
 
 	 				/*TODO: Process the data through the Complex Magnitude Module for
 	 				calculating the magnitude at each bin */
-	 				arm_cmplx_mag_f32(FFTdata, testOutput, fftSize);
+	 				arm_cmplx_mag_f32(FFTdata, FFTRawData, fftSize);
 
 	 				/*TODO: Calculates maxValue and returns corresponding BIN value */
-	 				arm_max_f32(testOutput, fftSize, &maxValue, &testIndex);
+	 				arm_max_f32(FFTRawData, 6, &FFTmaxValue, &FFTMaxValueIndex);
 
 	 			     /*
-	 				 * TODO: the testOutput in python  ==> testOutput = yf = abs(fft(signal = testInput_f32_10khz))
+	 				 * TODO: the FFTRawData in python  ==> FFTRawData = yf = abs(fft(signal = testInput_f32_10khz))
 	 				 * so we can make a new array like yf2 = 2/N * np.abs(yf[0:N//2]); in python
 	 				 * It kindly would be
-	 				 *  testOutput[] = 2/N * testOutput[0:N/2]
+	 				 *  FFTRawData[] = 2/N * FFTRawData[0:N/2]
 	 				 *
 	 				 * */
 
-	 				maxValue = maxValue*2 / dataLength;
+	 				//2021/0218/George
+	 				//TODO: Calculate displacement the max value condition is small than 20Hz
+	 				FFTMaxValueIndex = ( FFTMaxValueIndex == 0 ) ? FFTMaxValueIndex+1 : FFTMaxValueIndex;
+
+	 				//2021/0222/George
+	 				//TODO: frequency equal samplingRate / datalength
+	 				float frequencyResolution = (float)samplingRate/(float)fftSize;
+
+	 				//TODO: max acceleration value (peak) is frequency domain *2/datalength
+	 				float AccelerationFFTmaxValue = FFTmaxValue * 2 / dataLength;
+
+	 				//TODO: turn acceleration to velocity (peak), should acceleration * g / (2 * pi * f) unit is mm/s
+	 				float VelocityFFTmaxValue = AccelerationFFTmaxValue * 9807 /(2 * 3.1415926 * FFTMaxValueIndex * frequencyResolution);
+
+	 				//TODO: turn velocity to displacement (peak), should / (2 * pi *f) unit mm
+	 				float DisplacementFFTmaxValue = VelocityFFTmaxValue /(2 * 3.1415926 * FFTMaxValueIndex * frequencyResolution);
+
+	 				//TODO: turn displacement peak to (peak to peak)
+	 				float DisplacementP2pFFTmaxValue = DisplacementFFTmaxValue * 2;
+	 				//FFTmaxValue = FFTmaxValue*2 / dataLength;
+
+
 
 	 				/*TODO: Remove DC component*/
-	 				testOutput[1] = 0;
-	 				testOutput[2] = 0;
-	 				testOutput[3] = 0;
-	 				testOutput[4] = 0;
-	 				testOutput[5] = 0;
-	 				testOutput[6] = 0;
-	 				testOutput[7] = 0;
-	 				testOutput[8] = 0;
-	 				testOutput[4088] = 0;
-	 				testOutput[4089] = 0;
-	 				testOutput[4090] = 0;
-	 				testOutput[4091] = 0;
-	 				testOutput[4092] = 0;
-	 				testOutput[4093] = 0;
-	 				testOutput[4094] = 0;
-	 				testOutput[4095] = 0;
-
+	 				FFTRawData[1] = 0;
+	 				FFTRawData[2] = 0;
+	 				FFTRawData[3] = 0;
+	 				FFTRawData[4] = 0;
+	 				FFTRawData[5] = 0;
+	 				FFTRawData[6] = 0;
+	 				FFTRawData[7] = 0;
+	 				FFTRawData[8] = 0;
+	 				//FFT symmetry data 2021/0203/George
+	 				//TODO:introduce FFT symmetry principle
+	 				/*     |                                                                   |
+	 				 *     |                  |                             |                  |
+	 				 *     |        |         |                             |         |        |
+	 				 *  FFT[10] FFT[1000] FFT[1500] FFT[2047] FFT[2048] FFT[2596] FFT[3096] FFT[4086]
+	 				 * */
+	 				FFTRawData[4088] = 0;
+	 				FFTRawData[4089] = 0;
+	 				FFTRawData[4090] = 0;
+	 				FFTRawData[4091] = 0;
+	 				FFTRawData[4092] = 0;
+	 				FFTRawData[4093] = 0;
+	 				FFTRawData[4094] = 0;
+	 				FFTRawData[4095] = 0;
 
 
 	 				/* focus broad band functionality */
 					for(int i =0; i<sizeof(FreqSettingValueList)/sizeof(FreqMaxMin); i++)
 					{
 						settingValue = (&freqSettingValueList.range1+i);
-						Calculate_FreqMax(testOutput, settingValue, i);
+						Calculate_FreqBandRMS(FFTRawData, settingValue, i);
 					}
 					/* focus broad band functionality */
 
 
 	 				/*TODO: Calculate math function*/
-	 				statistic_value.Statistic_FreqOvall = Calculate_FreqOverAll(testOutput, dataLength);
+	 				statistic_value.Statistic_FreqOvall = Calculate_FreqOverAll(FFTRawData, dataLength);
 
 	 				arm_max_f32(statisticDataSet, dataLength, &statistic_value.Statistic_max, &maxtestIndex);
 	 				arm_min_f32(statisticDataSet, dataLength, &statistic_value.Statistic_min, &mintestIndex);
@@ -962,7 +945,7 @@ void FFT_Thread(void const * argument)
 	 				arm_mean_f32(statisticDataSet, dataLength, &statistic_value.Statistic_mean);
 	 				arm_std_f32(statisticDataSet, dataLength, &statistic_value.Statistic_std);
 	 				statistic_value.Statistic_crestFactor = statistic_value.Statistic_max/statistic_value.Statistic_rms;
-
+	 				statistic_value.Statistic_p2p = statistic_value.Statistic_max - statistic_value.Statistic_min;
 	 				//2021/02/01/George start compute
 	 				/*TODO: Calculate skewness and kurtosis will cause delay*/
 	 				statistic_value.Statistic_kurtosis = Calculate_kurtosis(statisticDataSet, dataLength);
@@ -972,11 +955,13 @@ void FFT_Thread(void const * argument)
 	 				averageTimes++;
 
 
-
+	 				//2021/0203/George
+	 				//TODO:new parameter p2p
 	 				if(averageTimes == 1)
 	 				{
 	 					statistic_value.Statistic_max_Temp = statistic_value.Statistic_max;
 	 					statistic_value.Statistic_min_Temp = statistic_value.Statistic_min;
+	 					statistic_value.Statistic_p2p_Temp = statistic_value.Statistic_p2p;
 	 					statistic_value.Statistic_var_Temp = statistic_value.Statistic_var;
 	 					statistic_value.Statistic_rms_Temp = statistic_value.Statistic_rms;
 	 					statistic_value.Statistic_mean_Temp = statistic_value.Statistic_mean;
@@ -984,11 +969,14 @@ void FFT_Thread(void const * argument)
 	 					statistic_value.Statistic_FreqOvall_Temp = statistic_value.Statistic_FreqOvall;
 	 					statistic_value.Statistic_crestFactor_Temp = statistic_value.Statistic_crestFactor;
 	 					statistic_value.Statistic_SpeedOvall_Temp = statistic_value.Statistic_SpeedOvall;
+	 					statistic_value.Statistic_kurtosis_Temp = statistic_value.Statistic_kurtosis;
+	 					statistic_value.Statistic_skewness_Temp = statistic_value.Statistic_skewness;
 	 				}
 	 				if(averageTimes == 2)
 	 				{
 	 					statistic_value.Statistic_max_Temp += statistic_value.Statistic_max;
 	 					statistic_value.Statistic_min_Temp += statistic_value.Statistic_min;
+	 					statistic_value.Statistic_p2p_Temp += statistic_value.Statistic_p2p;
 	 					statistic_value.Statistic_var_Temp += statistic_value.Statistic_var;
 	 					statistic_value.Statistic_rms_Temp += statistic_value.Statistic_rms;
 	 					statistic_value.Statistic_mean_Temp += statistic_value.Statistic_mean;
@@ -996,6 +984,8 @@ void FFT_Thread(void const * argument)
 	 					statistic_value.Statistic_FreqOvall_Temp += statistic_value.Statistic_FreqOvall;
 	 					statistic_value.Statistic_crestFactor_Temp += statistic_value.Statistic_crestFactor;
 	 					statistic_value.Statistic_SpeedOvall_Temp += statistic_value.Statistic_SpeedOvall;
+	 					statistic_value.Statistic_kurtosis_Temp += statistic_value.Statistic_kurtosis;
+	 					statistic_value.Statistic_skewness_Temp += statistic_value.Statistic_skewness;
 	 				}
 	 				if(averageTimes == 3)
 	 				{
@@ -1003,6 +993,8 @@ void FFT_Thread(void const * argument)
 	 							statistic_value.Statistic_max) / 3;
 	 					statistic_value.Statistic_min = (statistic_value.Statistic_min_Temp +
 	 							statistic_value.Statistic_min) / 3;
+	 					statistic_value.Statistic_p2p = (statistic_value.Statistic_p2p_Temp +
+								statistic_value.Statistic_p2p) / 3;
 	 					statistic_value.Statistic_var = (statistic_value.Statistic_var_Temp +
 	 							statistic_value.Statistic_var) / 3;
 	 					statistic_value.Statistic_rms = (statistic_value.Statistic_rms_Temp +
@@ -1017,7 +1009,10 @@ void FFT_Thread(void const * argument)
 	 							statistic_value.Statistic_crestFactor) / 3;
 	 					statistic_value.Statistic_SpeedOvall = (statistic_value.Statistic_SpeedOvall_Temp +
 	 							statistic_value.Statistic_SpeedOvall) / 3;
-
+	 					statistic_value.Statistic_kurtosis = (statistic_value.Statistic_kurtosis_Temp +
+	 							statistic_value.Statistic_kurtosis) / 3;
+	 					statistic_value.Statistic_skewness = (statistic_value.Statistic_skewness_Temp +
+	 							statistic_value.Statistic_skewness) / 3;
 
 
 	 					USARTBLE.sendflag = 1;

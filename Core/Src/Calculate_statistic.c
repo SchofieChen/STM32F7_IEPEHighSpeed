@@ -20,7 +20,7 @@ void Initial_AllStatisticValue()
 	statistic_value.Statistic_skewness = 0;
 	statistic_value.Statistic_FreqOvall = 0;
 	statistic_value.Statistic_SpeedOvall = 0;
-	statistic_value.Statistic_FreqPeak[20] = 0;
+
 
 
 	statistic_value.Statistic_max_Temp = 0;
@@ -38,45 +38,28 @@ void Initial_AllStatisticValue()
 }
 
 
-float Calculate_rms(float *data, int n)
-{
-	float32_t rmsAns = 0;
-	float32_t * ans = &rmsAns;
-	float32_t sum = 0;
-
-	for (int i = 0; i < n; i++)
-		sum += data[i]*data[i];
-
-	sum = sum / n;
-	arm_sqrt_f32(sum, ans);
-
-
-	return *ans;
-}
-
-void Calculate_FreqMax(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_index)
+void Calculate_FreqBandRMS(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_index)
 {
 	if(FreqMaxMin->Max != 0)
 	{
 
-		int DATARE = 15000;
-		float frequencyResolution = 15000/(float)fftSize;
+		int dataRate = 15000;
+		float frequencyResolution = dataRate/(float)fftSize;
 		float ans = 0;
-		//DRATE_15000 = 15000
+
 		float parseRangeMax = FreqMaxMin->Max / frequencyResolution;
 		float parseRangeMin = FreqMaxMin->Min / frequencyResolution;
 		float ParsevalFftPower = 0;
 
 		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
 		{
-			//FFTRMSArray[i] = (testOutput[i]*2)/4096;
 			ParsevalFftPower += x[i] * x[i];
 		}
 
 		ans = sqrt(ParsevalFftPower * 2)/4096;
 
 		statistic_value.Statistic_FreqPeak[freq_index] = ans;
-		}
+	}
 }
 
 
@@ -147,50 +130,90 @@ float Calculate_kurtosis(float *x, int n)
 
 float Calculate_FreqOverAll(float *x, int n)
 {
+	//2021/0209/George
+	//Acceleration sin(2πft) integral is Velocity cos(2πft)/2πft
+	//Velocity cos(2πft)/2πft integral is cos(2πft)/(2πft)^2
 	float ParsevalFftPower = 0;
-	float ans = 0;
-	for(int i = 0; i<n; i++)
+	float AccelerationRMS = 0;
+	float velocityPower = 0;
+	float displacementPower = 0;
+	float displacementP2p = 0;
+	uint32_t displacement_index = 0;
+
+	for(int i = 0; i<n/2; i++)
 	{
-		//FFTRMSArray[i] = (testOutput[i]*2)/4096;
 		ParsevalFftPower += x[i] * x[i];
 	}
 
 	int fftSize = 4096;
+
+
 	/*
+	 * 2021/0203/George
 	 * Compute Speed Ovall
-	 *
+	 * TODO: Improve compute fftSize to fftSize/2
 	 * */
 	float32_t sampleCount = 4096;
 	float32_t samplingRate = 15000;
 	float32_t frequencyScale = samplingRate/sampleCount;
 	float SpeedparsevalFftPower = 0;
 
-	for(uint16_t i = 1; i < fftSize; i++)
+	//2021/0203/George
+	//Calculate Velocity power
+	for(uint16_t i = 0; i < fftSize / 2; i++)
 	{
-		if(i < fftSize/2)
-		{
-			if(i ==0)
+			if(i < fftSize/2)
 			{
-				x[i] = x[i];
-			}
-			else
-			{
-				x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyScale * i);
+				if(i ==0)
+				{
+					x[i] = x[i];
+				}
+				else
+				{
+					x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyScale * i);
+
+				}
+				velocityPower += x[i] * x[i];
+
 			}
 
-		}
-		else if(i > fftSize/2)
-		{
-			x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyScale * abs(fftSize-i));
-		}
-		SpeedparsevalFftPower += x[i] * x[i];
 	}
 
+	//2021/0203/George
+	//Calculate displacement power
+	for(uint16_t i = 0; i < fftSize / 2; i++)
+	{
+			if(i < fftSize/2)
+			{
+				if(i ==0)
+				{
+					x[i] = x[i];
+				}
+				else
+				{
+					x[i] = (x[i]) / (2 * 3.1415926 * frequencyScale * i);
+
+				}
+				displacementPower += x[i] * x[i];
+
+			}
+
+	}
+
+	//2021/0203/George2
+	//TODO:calculate
+	arm_max_f32(x, 2048, &displacementP2p, &displacement_index);
 
 
-	ans = sqrt(ParsevalFftPower)/n;
-	statistic_value.Statistic_SpeedOvall = sqrt(SpeedparsevalFftPower)/n;
-	return ans;
+	//2021/0203/George
+	//TODO: improve formula from sqrt(ParsevalFftPower)/n to sqrt(2 * ParsevalFftPower)/n;
+	AccelerationRMS = sqrt(2 * ParsevalFftPower)/n;
+
+	//2021/0203/George
+	//TODO: improve formula from sqrt(velocityPower)/n to sqrt(2 * velocityPower)/n;
+	statistic_value.Statistic_SpeedOvall = sqrt(2 * velocityPower)/n; // unit : mm/s
+	statistic_value.Statistic_DisplacementOvall = 1000 * sqrt(2 * displacementPower)/n; // unit : um
+	return AccelerationRMS;
 }
 
 

@@ -10,7 +10,7 @@ typedef struct FreqMaxMinInstance
 }FreqMaxMin;
 
 float Calculate_max(float *data);
-void Calculate_FreqMax(float *data,  FreqMaxMin * FreqMaxMin , int8_t freq_index);
+void Calculate_FreqBandRMS(float *data,  FreqMaxMin * FreqMaxMin , int8_t freq_index);
 float Calculate_skewness(float *data, int n);
 float Calculate_kurtosis(float *data, int n);
 float Calculate_rms(float *data, int n);
@@ -26,11 +26,13 @@ typedef struct Statistic_value
 	float Statistic_rms;
 	float Statistic_mean;
 	float Statistic_std;
+	float Statistic_p2p;
 	float Statistic_crestFactor;
 	float Statistic_kurtosis;
 	float Statistic_skewness;
 	float Statistic_FreqOvall;
 	float Statistic_SpeedOvall;
+	float Statistic_DisplacementOvall;
 	float Statistic_FreqPeak[20];
 
 
@@ -40,11 +42,13 @@ typedef struct Statistic_value
 	float Statistic_rms_Temp;
 	float Statistic_mean_Temp;
 	float Statistic_std_Temp;
+	float Statistic_p2p_Temp;
 	float Statistic_crestFactor_Temp;
 	float Statistic_kurtosis_Temp;
 	float Statistic_skewness_Temp;
 	float Statistic_FreqOvall_Temp;
 	float Statistic_SpeedOvall_Temp;
+	float Statistic_DisplacementOvall_Temp;
 }Sv;
 
 struct Freq_settingValue
