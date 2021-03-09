@@ -34,7 +34,7 @@ typedef struct Statistic_value
 	float Statistic_SpeedOvall;
 	float Statistic_DisplacementOvall;
 	float Statistic_FreqPeak[20];
-
+	float Statistic_VeloccityFreqPeak[20];
 
 	float Statistic_max_Temp;
 	float Statistic_min_Temp;

@@ -45,20 +45,42 @@ void Calculate_FreqBandRMS(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_inde
 
 		int dataRate = 15000;
 		float frequencyResolution = dataRate/(float)fftSize;
-		float ans = 0;
+		float accelerationRMS = 0;
 
 		float parseRangeMax = FreqMaxMin->Max / frequencyResolution;
 		float parseRangeMin = FreqMaxMin->Min / frequencyResolution;
 		float ParsevalFftPower = 0;
+		float velocityPower = 0;
+		float velocityRMS = 0;
 
 		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
 		{
 			ParsevalFftPower += x[i] * x[i];
 		}
 
-		ans = sqrt(ParsevalFftPower * 2)/4096;
+		//2021/03/09/George/Velocity target RMS
+		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
+		{
 
-		statistic_value.Statistic_FreqPeak[freq_index] = ans;
+			if(i ==0)
+			{
+				x[i] = x[i];
+			}
+			else
+			{
+				x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyResolution * i);
+
+			}
+			velocityPower += x[i] * x[i];
+		}
+
+		accelerationRMS = sqrt(ParsevalFftPower * 2)/4096;
+
+		//2021/0309/George/ Velocity RMS ans
+		velocityRMS = sqrt(velocityPower * 2)/4096;
+
+		statistic_value.Statistic_FreqPeak[freq_index] = accelerationRMS;
+		statistic_value.Statistic_VeloccityFreqPeak[freq_index] = velocityRMS;
 	}
 }
 
