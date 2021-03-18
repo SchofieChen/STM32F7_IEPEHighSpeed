@@ -258,8 +258,8 @@ void InitialSetFreqStatisticBand()
 {
 	//2021/0204/George
 	//TODO:Total 3 setting frequency broadband parameter
-	freqSettingValueList.range1.Max = 5000;
-	freqSettingValueList.range1.Min = 10;
+	freqSettingValueList.range1.Max = 700;
+	freqSettingValueList.range1.Min = 500;
 	freqSettingValueList.range2.Max = 1000;
 	freqSettingValueList.range2.Min = 10;
 	freqSettingValueList.range3.Max = 5000;
@@ -730,8 +730,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		}
 
 		data = read;
-		//2021/0309/George//data = data / 1677721;
-		data = data / (1678043 * 0.496);
+		//2021/0309/George
+		data = data / 1677721;
+		//data = data / (1678043 * 0.496);
 		ADS1256.data_buffer[ADS1256.data_index] = data; //plus 2 for FFT using
 		ADS1256.data_index++;
 
@@ -1024,7 +1025,7 @@ void FFT_Thread(void const * argument)
 
 	 					//2021/0201/George
 	 					//TODO : Initial statistic value to zero
-	 					Initial_AllStatisticValue();
+	 					//Initial_AllStatisticValue();
 
 	 				}
 

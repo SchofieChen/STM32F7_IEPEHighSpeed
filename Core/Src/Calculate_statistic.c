@@ -4,6 +4,7 @@ extern uint32_t fftSize;
 extern float speedans;
 extern Sv statistic_value;
 
+float velocityBuffer[4096];
 
 //2021/0201/George
 //TODO: Reset All parameter
@@ -38,51 +39,7 @@ void Initial_AllStatisticValue()
 }
 
 
-void Calculate_FreqBandRMS(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_index)
-{
-	if(FreqMaxMin->Max != 0)
-	{
 
-		int dataRate = 15000;
-		float frequencyResolution = dataRate/(float)fftSize;
-		float accelerationRMS = 0;
-
-		float parseRangeMax = FreqMaxMin->Max / frequencyResolution;
-		float parseRangeMin = FreqMaxMin->Min / frequencyResolution;
-		float ParsevalFftPower = 0;
-		float velocityPower = 0;
-		float velocityRMS = 0;
-
-		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
-		{
-			ParsevalFftPower += x[i] * x[i];
-		}
-
-		//2021/03/09/George/Velocity target RMS
-		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
-		{
-
-			if(i ==0)
-			{
-				x[i] = x[i];
-			}
-			else
-			{
-				x[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyResolution * i);
-
-			}
-			velocityPower += x[i] * x[i];
-		}
-
-		accelerationRMS = sqrt(ParsevalFftPower * 2)/4096;
-
-		//2021/0309/George/ Velocity RMS ans
-		velocityRMS = sqrt(velocityPower * 2)/4096;
-
-		statistic_value.Statistic_FreqPeak[freq_index] = accelerationRMS;
-		statistic_value.Statistic_VeloccityFreqPeak[freq_index] = velocityRMS;
-	}
-}
 
 
 
@@ -148,6 +105,53 @@ float Calculate_kurtosis(float *x, int n)
 
 	float Kurtosis = m4 / (m2 * m2) - 3.0;
     return Kurtosis;
+}
+
+void Calculate_FreqBandRMS(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_index)
+{
+
+	if(FreqMaxMin->Max != 0)
+	{
+
+		int dataRate = 15000;
+		float frequencyResolution = dataRate/(float)fftSize;
+		float accelerationRMS = 0;
+
+		float parseRangeMax = FreqMaxMin->Max / frequencyResolution;
+		float parseRangeMin = FreqMaxMin->Min / frequencyResolution;
+		float ParsevalFftPower = 0;
+		float velocityPower = 0;
+		float velocityRMS = 0;
+
+		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
+		{
+			ParsevalFftPower += x[i] * x[i];
+		}
+
+		//2021/03/09/George/Velocity target RMS
+		for(int i = (int)parseRangeMin; i<(int)parseRangeMax; i++)
+		{
+
+			if(i ==0)
+			{
+				velocityBuffer[i] = x[i];
+			}
+			else
+			{
+				velocityBuffer[i] = (x[i] * 9807) / (2 * 3.1415926 * frequencyResolution * i);
+
+			}
+			velocityPower += velocityBuffer[i] * velocityBuffer[i];
+		}
+
+		accelerationRMS = sqrt(ParsevalFftPower * 2)/4096;
+
+		//2021/0309/George/ Velocity RMS ans
+		velocityRMS = sqrt(velocityPower * 2)/4096;
+
+		statistic_value.Statistic_FreqPeak[freq_index] = accelerationRMS;
+		statistic_value.Statistic_VeloccityFreqPeak[freq_index] = velocityRMS;
+	}
 }
 
 float Calculate_FreqOverAll(float *x, int n)

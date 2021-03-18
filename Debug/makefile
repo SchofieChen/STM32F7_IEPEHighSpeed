@@ -57,6 +57,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 STM32F7_HighSpeed_IEPE.list \
 
+OBJCOPY_HEX += \
+STM32F7_HighSpeed_IEPE.hex \
+
 OBJCOPY_BIN += \
 STM32F7_HighSpeed_IEPE.bin \
 
@@ -83,6 +86,11 @@ STM32F7_HighSpeed_IEPE.list: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+STM32F7_HighSpeed_IEPE.hex: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "STM32F7_HighSpeed_IEPE.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 STM32F7_HighSpeed_IEPE.bin: $(EXECUTABLES)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "STM32F7_HighSpeed_IEPE.bin"
 	@echo 'Finished building: $@'
@@ -93,7 +101,7 @@ clean:
 	-$(RM) *
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
