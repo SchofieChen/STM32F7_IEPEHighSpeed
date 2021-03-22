@@ -29,8 +29,8 @@ void BLE_USART(UART_HandleTypeDef *huart, Sv *sendpData )
 
 		//2021/0201/George
 		//TODO : BLE transmission parameter number3 from var to min and
-		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f", sendpData->Statistic_FreqOvall*1000,sendpData->Statistic_SpeedOvall*1000,
-					sendpData->Statistic_DisplacementOvall,sendpData->Statistic_max*1000,sendpData->Statistic_min*1000,sendpData->Statistic_p2p*1000,
+		snprintf_(USARTBLE.buffer, 128 , "%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f", sendpData->Statistic_FreqOvall*1000,sendpData->Statistic_SpeedOvall*1000,
+					sendpData->Statistic_Displacementp2p,sendpData->Statistic_max*1000,sendpData->Statistic_p2p*1000,
 					sendpData->Statistic_var*1000,sendpData->Statistic_mean*1000,sendpData->Statistic_crestFactor*1000,
 					sendpData->Statistic_kurtosis*1000, sendpData->Statistic_skewness*1000,
 					statistic_value.Statistic_FreqPeak[0]*1000,statistic_value.Statistic_FreqPeak[1]*1000,statistic_value.Statistic_FreqPeak[2]*1000,

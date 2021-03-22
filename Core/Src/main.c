@@ -216,7 +216,7 @@ float32_t FFTRawData[FFT_LENGTH_SAMPLES/2];
 float *dataRecive[4096];
 float *xdatatoSend = ADS1256.data_buffer;
 float FFTdata[8192];
-float rawData[4096];
+
 
 float speedans = 0;
 
@@ -246,7 +246,7 @@ void initialBootloaderParameter()
 //TODO : Initialize ADS1256 data buffer size
 void initialADS1256DataBuffer()
 {
-	  statisticDataSet = rawData;
+
 	  dataLength = sizeof(dataRecive)/sizeof(float);
 	  ADS1256.data_index = 0;
 	  ADS1256.data_length = dataLength;
@@ -352,6 +352,10 @@ int main(void)
   MX_I2C2_Init();
   MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
+  //2021/0319/George/HTi
+  //TODO:PB6 for IEPE output
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+
   //2021/0201/George
   //TODO: InitialParameter
   initialBootloaderParameter();
@@ -684,6 +688,9 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_13, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PA3 */
   GPIO_InitStruct.Pin = GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
@@ -703,6 +710,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
@@ -731,8 +745,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 		data = read;
 		//2021/0309/George
-		data = data / 1677721;
-		//data = data / (1678043 * 0.496);
+		//data = data / 1677721;
+		data = data / (1678043 * 0.496);
 		ADS1256.data_buffer[ADS1256.data_index] = data; //plus 2 for FFT using
 		ADS1256.data_index++;
 
@@ -847,13 +861,16 @@ void FFT_Thread(void const * argument)
 
 	 			HAL_IWDG_Refresh(&hiwdg);
 
+	 			float32_t * rawdataBuffer;
+	 			rawdataBuffer = pvPortMalloc(4096 * sizeof(float32_t));
+
 	 			//TODO : disable collect data flag
 	 			stattisComputingStatus = statisticComputingBUSY;
 
 	 			for(uint32_t i = 0; i<dataLength; i++)
 	 			{
 	 				//recivedata5 = *(dataRecive[0]+i);
-	 				rawData[i]=*(dataRecive[0]+i);
+	 				rawdataBuffer[i]=*(dataRecive[0]+i);
 	 				FFTdata[i*2] = *(dataRecive[0]+i);
 	 				FFTdata[i*2+1] = 0; // data format like
 	 			}
@@ -869,7 +886,7 @@ void FFT_Thread(void const * argument)
 	 				arm_cmplx_mag_f32(FFTdata, FFTRawData, fftSize);
 
 	 				/*TODO: Calculates maxValue and returns corresponding BIN value */
-	 				arm_max_f32(FFTRawData, 6, &FFTmaxValue, &FFTMaxValueIndex);
+	 				arm_max_f32(FFTRawData, 2048, &FFTmaxValue, &FFTMaxValueIndex);
 
 	 			     /*
 	 				 * TODO: the FFTRawData in python  ==> FFTRawData = yf = abs(fft(signal = testInput_f32_10khz))
@@ -886,6 +903,7 @@ void FFT_Thread(void const * argument)
 	 				//2021/0222/George
 	 				//TODO: frequency equal samplingRate / datalength
 	 				float frequencyResolution = (float)samplingRate/(float)fftSize;
+	 				float integral = 2 * 3.1415926 * FFTMaxValueIndex * frequencyResolution;
 
 	 				//TODO: max acceleration value (peak) is frequency domain *2/datalength
 	 				float AccelerationFFTmaxValue = FFTmaxValue * 2 / dataLength;
@@ -928,6 +946,33 @@ void FFT_Thread(void const * argument)
 	 				FFTRawData[4095] = 0;
 
 
+					//2021/0319/George
+	 				/*TODO: Calculate time-domain math function*/
+	 				arm_max_f32(rawdataBuffer, dataLength, &statistic_value.Statistic_max, &maxtestIndex);
+	 				arm_min_f32(rawdataBuffer, dataLength, &statistic_value.Statistic_min, &mintestIndex);
+	 				arm_var_f32(rawdataBuffer, dataLength, &statistic_value.Statistic_var);
+	 				arm_rms_f32(rawdataBuffer, dataLength, &statistic_value.Statistic_rms);
+	 				arm_mean_f32(rawdataBuffer, dataLength, &statistic_value.Statistic_mean);
+	 				arm_std_f32(rawdataBuffer, dataLength, &statistic_value.Statistic_std);
+	 				statistic_value.Statistic_crestFactor = statistic_value.Statistic_max/statistic_value.Statistic_rms;
+	 				statistic_value.Statistic_p2p = statistic_value.Statistic_max - statistic_value.Statistic_min;
+
+	 				//2021/03/22/George
+	 				//TODO: calculate Statistic_Displacementp2p using time-domain p2p
+	 				//formula : speedp2p = p2p / (2*pi*f), displacement = displacementp2p = speedp2p / (2*pi*f)
+	 				statistic_value.Statistic_Displacementp2p = statistic_value.Statistic_p2p*9807 / (integral * integral);
+	 				//2021/02/01/George start compute
+	 				/*TODO: Calculate skewness and kurtosis will cause delay*/
+	 				statistic_value.Statistic_kurtosis = Calculate_kurtosis(rawdataBuffer, dataLength);
+	 				statistic_value.Statistic_skewness = Calculate_skewness(rawdataBuffer, dataLength);
+
+	 				//2021/0319/George
+	 				//TODO:free rawdataBuffer memory
+	 				vPortFree(rawdataBuffer);
+
+					//2021/0319/George
+	 				/*TODO: Calculate frequency-domain math function*/
+
 	 				/* focus broad band functionality */
 					for(int i =0; i<sizeof(FreqSettingValueList)/sizeof(FreqMaxMin); i++)
 					{
@@ -936,26 +981,14 @@ void FFT_Thread(void const * argument)
 					}
 					/* focus broad band functionality */
 
+					//2021/0319/George
+	 				/*TODO: Calculate acceleration, velocity, displacement RMS*/
+	 				Calculate_FreqOverAll(FFTRawData, dataLength);
 
-	 				/*TODO: Calculate math function*/
-	 				statistic_value.Statistic_FreqOvall = Calculate_FreqOverAll(FFTRawData, dataLength);
 
-	 				arm_max_f32(statisticDataSet, dataLength, &statistic_value.Statistic_max, &maxtestIndex);
-	 				arm_min_f32(statisticDataSet, dataLength, &statistic_value.Statistic_min, &mintestIndex);
-	 				arm_var_f32(statisticDataSet, dataLength, &statistic_value.Statistic_var);
-	 				arm_rms_f32(statisticDataSet, dataLength, &statistic_value.Statistic_rms);
-	 				arm_mean_f32(statisticDataSet, dataLength, &statistic_value.Statistic_mean);
-	 				arm_std_f32(statisticDataSet, dataLength, &statistic_value.Statistic_std);
-	 				statistic_value.Statistic_crestFactor = statistic_value.Statistic_max/statistic_value.Statistic_rms;
-	 				statistic_value.Statistic_p2p = statistic_value.Statistic_max - statistic_value.Statistic_min;
-	 				//2021/02/01/George start compute
-	 				/*TODO: Calculate skewness and kurtosis will cause delay*/
-	 				statistic_value.Statistic_kurtosis = Calculate_kurtosis(statisticDataSet, dataLength);
-	 				statistic_value.Statistic_skewness = Calculate_skewness(statisticDataSet, dataLength);
 
 	 				/*TODO: to calculate 3 times moving average*/
 	 				averageTimes++;
-
 
 	 				//2021/0203/George
 	 				//TODO:new parameter p2p

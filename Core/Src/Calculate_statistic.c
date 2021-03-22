@@ -1,10 +1,11 @@
 #include "Calculate_statistic.h"
+#include "cmsis_os.h"
 
 extern uint32_t fftSize;
 extern float speedans;
 extern Sv statistic_value;
 
-float velocityBuffer[4096];
+
 
 //2021/0201/George
 //TODO: Reset All parameter
@@ -112,6 +113,8 @@ void Calculate_FreqBandRMS(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_inde
 
 	if(FreqMaxMin->Max != 0)
 	{
+		float * velocityBuffer;
+		velocityBuffer = pvPortMalloc(4096 * sizeof(float));
 
 		int dataRate = 15000;
 		float frequencyResolution = dataRate/(float)fftSize;
@@ -151,10 +154,12 @@ void Calculate_FreqBandRMS(float *x,  FreqMaxMin * FreqMaxMin , int8_t freq_inde
 
 		statistic_value.Statistic_FreqPeak[freq_index] = accelerationRMS;
 		statistic_value.Statistic_VeloccityFreqPeak[freq_index] = velocityRMS;
+
+		vPortFree(velocityBuffer);
 	}
 }
 
-float Calculate_FreqOverAll(float *x, int n)
+void Calculate_FreqOverAll(float *x, int n)
 {
 	//2021/0209/George
 	//Acceleration sin(2πft) integral is Velocity cos(2πft)/2πft
@@ -237,6 +242,7 @@ float Calculate_FreqOverAll(float *x, int n)
 
 	//2021/0203/George
 	//TODO: improve formula from sqrt(velocityPower)/n to sqrt(2 * velocityPower)/n;
+	statistic_value.Statistic_FreqOvall = AccelerationRMS;
 	statistic_value.Statistic_SpeedOvall = sqrt(2 * velocityPower)/n; // unit : mm/s
 	statistic_value.Statistic_DisplacementOvall = 1000 * sqrt(2 * displacementPower)/n; // unit : um
 	return AccelerationRMS;

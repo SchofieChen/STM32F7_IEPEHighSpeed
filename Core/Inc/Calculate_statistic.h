@@ -14,7 +14,7 @@ void Calculate_FreqBandRMS(float *data,  FreqMaxMin * FreqMaxMin , int8_t freq_i
 float Calculate_skewness(float *data, int n);
 float Calculate_kurtosis(float *data, int n);
 float Calculate_rms(float *data, int n);
-float Calculate_FreqOverAll(float *data, int n);
+void Calculate_FreqOverAll(float *data, int n);
 float Calculate_SpeedOverAll(float *x, int n);
 void Initial_AllStatisticValue();
 
@@ -33,6 +33,7 @@ typedef struct Statistic_value
 	float Statistic_FreqOvall;
 	float Statistic_SpeedOvall;
 	float Statistic_DisplacementOvall;
+	float Statistic_Displacementp2p;
 	float Statistic_FreqPeak[20];
 	float Statistic_VeloccityFreqPeak[20];
 
