@@ -744,9 +744,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		}
 
 		data = read;
-		//2021/0309/George
-		//data = data / 1677721;
-		data = data / (1678043 * 0.496);
+		//2021/0309/George for SMG device
+		data = data / 1677721;
+
+		//2021/0811/George for HTi device
+		//data = data / (1678043 * 0.496);
 		ADS1256.data_buffer[ADS1256.data_index] = data; //plus 2 for FFT using
 		ADS1256.data_index++;
 
